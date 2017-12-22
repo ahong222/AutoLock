@@ -12,9 +12,8 @@
 @property(weak) IBOutlet NSButton *registerButton;
 @end
 
-NSString *const client_id = @"10573261";
+NSString *const client_id = @"kw5KRljuMq4W64HYetziaLnA";
 NSString *const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
-NSString *const API_KEY = @"kw5KRljuMq4W64HYetziaLnA";
 NSString *const grant_type = @"client_credentials";
 NSString* userId;
 int sleeped;
@@ -339,7 +338,7 @@ NSString *accessToken;
 //获取token成功回调
 - (void)getAccessTokenSuccess:(BOOL)success token:(NSString *)token {
     NSLog(@"getAccessToken Success:%i, token:%@", success, token);
-    if (success == YES) {
+    if (success) {
         [self writeDataToPlist:@"token" value:token];
     }
 
@@ -391,7 +390,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
 - (void)onRecognizeFace:(NSString *)base64data {
     NSLog(@"recognitionFace start.");
     NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/verify";
-    NSString *uid = @"zhangzhenxissd";
+    NSString *uid = [self getUUID];
     NSString *groupId = uid;
     NSString *image = base64data;
     NSString *access_token = [self getAccessToken];
@@ -451,7 +450,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
     };
 
     // 路径
-    NSString *path = @"https://aip.baidubce.com/oauth/2.0/token";
+    NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=%@&client_secret=%@", client_id, client_secret];
 
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
         if (connectionError || data == nil) {
@@ -459,7 +458,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
             [self getAccessTokenSuccess:NO token:nil];
             return;
         } else {
-            NSLog(@"getAccessToken success");
+            NSLog(@"getAccessToken success data = [%@]", data);
             NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
             NSString *error = dict[@"error"];
             NSString *error_description = dict[@"error_description"];
@@ -474,7 +473,28 @@ typedef enum REQUEST_TYPE : NSUInteger {
         }
     };
 
-    [self postRequest:path params:params headers:nil requestHandler:requestHandler];
+    NSLog(@"getAccessToken request start : path[%@]", path);
+    NSString* jsonString = [[NSString alloc]initWithContentsOfURL:[NSURL URLWithString:path] encoding:NSUTF8StringEncoding error:nil];
+    if(nil == jsonString) {
+        [self getAccessTokenSuccess:NO token:nil];
+        return;
+    }
+    //将字符串写到缓冲区。
+    NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    //解析json数据，使用系统方法 JSONObjectWithData:  options: error:
+    NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableLeaves error:nil];
+    NSString *error = dict[@"error"];
+    NSString *error_description = dict[@"error_description"];
+    if (error) {
+        NSLog(@"getAccessToken failed : error:%@\tdescription:%@\n", error, error_description);
+        [self getAccessTokenSuccess:NO token:nil];
+    } else {
+        NSString *access_token = dict[@"access_token"];
+        NSLog(@"getAccessToken succeed : access_token = %@\trefresh_token = %@\tsession_key = %@\tsession_key = %@\tsession_secret = %@", access_token, dict[@"refresh_token"], dict[@"session_key"], dict[@"session_secret"]);
+        [self getAccessTokenSuccess:YES token:access_token];
+    }
+
+//    [self postRequest:path params:nil headers:nil requestHandler:requestHandler];
 }
 
 //注册，UI线程调用
@@ -482,12 +502,13 @@ typedef enum REQUEST_TYPE : NSUInteger {
 
     NSLog(@"onStartRegister data:%@", base64data);
     NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/faceset/user/add";
-    NSString *uid = @"zhangzhenxissd";
+    NSString *uid = [self getUUID];
     NSString *user_info = uid;
     NSString *groupId = uid;
     NSString *image = base64data;
     NSString *action_type = @"replace";
     NSString *access_token = [self getAccessToken];
+    NSLog(@"onStartRegister : access_token=[%@]\timage=[%@]", access_token, image);
     NSDictionary *dictionary = @{
             @"uid": uid,
             @"user_info": user_info,
@@ -576,19 +597,23 @@ typedef enum REQUEST_TYPE : NSUInteger {
     request.timeoutInterval = 30;
     request.HTTPMethod = @"POST";
 
-    //设置请求体
-    NSString *param = [NSString alloc];
-    for(NSString * key in params) {
-        NSUInteger indexOfKey = [[params allKeys] indexOfObject:key];
-        if(indexOfKey < params.count - 1) {
-            [param stringByAppendingFormat:@"%@=%@&", key, [params valueForKey:key]];
-        } else {
-            [param stringByAppendingFormat:@"%@=%@", key, [params valueForKey:key]];
+    if(nil != params) {
+        //设置请求体
+        NSString *param = @"";
+        for(NSString * key in params) {
+            NSUInteger indexOfKey = [[params allKeys] indexOfObject:key];
+            if(indexOfKey < params.count - 1) {
+                [param stringByAppendingFormat:@"%@=%@&", key, [params valueForKey:key]];
+            } else {
+                [param stringByAppendingFormat:@"%@=%@", key, [params valueForKey:key]];
+            }
         }
+        NSLog(@"request param = [%@]", param);
+        // NSString --> NSData
+        request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
+    } else {
+        request.HTTPBody = [@"" dataUsingEncoding:NSUTF8StringEncoding];
     }
-    NSLog(@"request param = [%@]", param);
-    // NSString --> NSData
-    request.HTTPBody =  [param dataUsingEncoding:NSUTF8StringEncoding];
 
     // 设置请求头
     if (headers != nil) {
