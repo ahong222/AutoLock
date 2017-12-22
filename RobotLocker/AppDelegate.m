@@ -20,7 +20,8 @@ NSString* userId;
 
 @implementation AppDelegate {
     CMSampleBufferRef _buffer;
-    BOOL _takePhoto;
+    //0: 1:takePhoto for register,2: takePhot for recongnizer
+    int _takePhoto;
     NSImage *_image;
 }
 
@@ -29,12 +30,65 @@ NSString* userId;
     // Insert code here to initialize your application
 
     [self setupCaptureSession];
-    [self onAppStart];
+//    [self onAppStart];
 }
 
+- (void)applicationDidUnhide:(NSNotification *)notification {
+    NSLog(@"applicationDidUnhide");
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    NSLog(@"applicationDidBecomeActive");
+}
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
+    NSLog(@"applicationWillTerminate");
+}
+
+
+- (void)applicationWillFinishLaunching:(NSNotification *)notification {
+    NSLog(@"applicationWillFinishLaunching");
+}
+- (void)applicationWillHide:(NSNotification *)notification
+{
+    NSLog(@"applicationWillHide");
+}
+- (void)applicationDidHide:(NSNotification *)notification
+{
+    NSLog(@"applicationDidHide");
+}
+- (void)applicationWillUnhide:(NSNotification *)notification
+{
+    NSLog(@"applicationWillUnhide");
+}
+- (void)applicationWillBecomeActive:(NSNotification *)notification
+{
+    NSLog(@"applicationWillBecomeActive");
+}
+- (void)applicationWillResignActive:(NSNotification *)notification
+{
+    NSLog(@"applicationWillResignActive");
+}
+- (void)applicationDidResignActive:(NSNotification *)notification
+{
+    NSLog(@"applicationDidResignActive");
+}
+- (void)applicationWillUpdate:(NSNotification *)notification
+{
+    NSLog(@"applicationWillUpdate");
+}
+- (void)applicationDidUpdate:(NSNotification *)notification
+{
+    NSLog(@"applicationDidUpdate ，%@", notification);
+}
+- (void)applicationDidChangeScreenParameters:(NSNotification *)notification
+{
+    NSLog(@"applicationDidChangeScreenParameters %@",notification);
+}
+- (void)applicationDidChangeOcclusionState:(NSNotification *)notification NS_AVAILABLE_MAC(10_9)
+{
+    NSLog(@"applicationDidChangeOcclusionState");
 }
 
 
@@ -45,7 +99,7 @@ NSString* userId;
     NSString *date = [dateFormator stringFromDate:[NSDate date]];
     NSLog(@"handleTimer %i", date);
     
-    [self recognitionFace];
+    _takePhoto = 2;
 }
 
 - (void)setupCaptureSession {
@@ -113,10 +167,10 @@ NSString* userId;
 
 - (IBAction)photo:(id)sender {
 
-    _takePhoto = YES;
+    _takePhoto = 1;
 }
 
-- (void)getImage {
+- (void)getImage:(int)takePhotoType {
     NSImage *image = [self imageFromSampleBuffer:_buffer];
     _image = image;
 
@@ -135,7 +189,11 @@ NSString* userId;
     NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
     NSLog(@"Encode:%@", base64Encode);
 
-    [self onStartRegister:base64Encode];
+    if (takePhotoType == 1) {
+        [self onStartRegister:base64Encode];
+    } else {
+        [self onRecognizeFace:base64Encode];
+    }
 
 
     //图片写文件
@@ -160,10 +218,11 @@ NSString* userId;
 //每当AVCaptureVideoDataOutput实例输出一个新视频帧时就会调用此函数
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     //NSLog(@"captureOutput %i" ,_takePhoto);
-    if (_takePhoto) {
-        _takePhoto = NO;
+    if (_takePhoto != 0) {
+        int takePhotoType = _takePhoto;
+        _takePhoto = 0;
         _buffer = sampleBuffer;
-        [self getImage];
+        [self getImage:takePhotoType];
     }
 }
 
@@ -366,7 +425,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
 }
 
 //人脸识别，UI线程调用
-- (void)recognitionFace:(NSString *)base64data {
+- (void)onRecognizeFace:(NSString *)base64data {
     NSLog(@"recognitionFace start.");
     NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/verify";
     NSString *uid = @"zhangzhenxissd";
