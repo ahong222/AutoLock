@@ -2,6 +2,7 @@
 #import "AppDelegate.h"
 #import "LockTimer.h"
 
+
 #import <AVFoundation/AVFoundation.h>
 
 @interface AppDelegate () <AVCaptureVideoDataOutputSampleBufferDelegate>
@@ -15,6 +16,7 @@ NSString *const client_id = @"10573261";
 NSString *const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
 NSString *const API_KEY = @"kw5KRljuMq4W64HYetziaLnA";
 NSString *const grant_type = @"client_credentials";
+NSString* userId;
 
 @implementation AppDelegate {
     CMSampleBufferRef _buffer;
@@ -42,6 +44,8 @@ NSString *const grant_type = @"client_credentials";
     dateFormator.dateFormat = @"yyyy-MM-dd  HH:mm:ss";
     NSString *date = [dateFormator stringFromDate:[NSDate date]];
     NSLog(@"handleTimer %i", date);
+    
+    [self recognitionFace];
 }
 
 - (void)setupCaptureSession {
@@ -207,40 +211,41 @@ NSString *const grant_type = @"client_credentials";
 }
 
 - (void)watchKeyBoard {
-
     [NSEvent addGlobalMonitorForEventsMatchingMask:NSLeftMouseDownMask | NSMouseMovedMask | NSMouseEnteredMask
                     | NSKeyDownMask | NSScrollWheel | NSCursorUpdate | NSOtherMouseDown | NSOtherMouseDragged
 
                                            handler:^(NSEvent *event) {
-                                               switch (event.type) {
-                                                   case NSOtherMouseDragged:
-                                                       NSLog(@"NSOtherMouseDragged");
-                                                       break;
-                                                   case NSOtherMouseDown:
-                                                       NSLog(@"NSOtherMouseDown");
-                                                       break;
-                                                   case NSCursorUpdate:
-                                                       NSLog(@"NSCursorUpdate");
-                                                       break;
-                                                   case NSScrollWheel:
-                                                       NSLog(@"NSScrollWheel");
-                                                       break;
-                                                   case NSKeyDownMask:
-                                                       NSLog(@"NSKeyDownMask");
-                                                       break;
-                                                   case NSLeftMouseDownMask:
-                                                       NSLog(@"NSLeftMouseDownMask");
-                                                       break;
-                                                   case NSMouseMovedMask:
-                                                       NSLog(@"NSMouseMovedMask");
-                                                       break;
-                                                   case NSMouseEnteredMask:
-                                                       NSLog(@"NSMouseEnteredMask");
-                                                       break;
-                                                   default:
-                                                       NSLog(@"其他");
-                                                       break;
-                                               }
+//                                               switch (event.type) {
+//                                                   case NSOtherMouseDragged:
+//                                                       NSLog(@"NSOtherMouseDragged");
+//                                                       break;
+//                                                   case NSOtherMouseDown:
+//                                                       NSLog(@"NSOtherMouseDown");
+//                                                       break;
+//                                                   case NSCursorUpdate:
+//                                                       NSLog(@"NSCursorUpdate");
+//                                                       break;
+//                                                   case NSScrollWheel:
+//                                                       NSLog(@"NSScrollWheel");
+//                                                       break;
+//                                                   case NSKeyDownMask:
+//                                                       NSLog(@"NSKeyDownMask");
+//                                                       break;
+//                                                   case NSLeftMouseDownMask:
+//                                                       NSLog(@"NSLeftMouseDownMask");
+//                                                       break;
+//                                                   case NSMouseMovedMask:
+//                                                       NSLog(@"NSMouseMovedMask");
+//                                                       break;
+//                                                   case NSMouseEnteredMask:
+//                                                       NSLog(@"NSMouseEnteredMask");
+//                                                       break;
+//                                                   default:
+//                                                       NSLog(@"其他");
+//                                                       break;
+//                                               }
+                                               
+                                               [self stopTimer];
 
                                            }
     ];
@@ -263,18 +268,21 @@ NSString *accessToken;
 
 //app 启动
 - (void)onAppStart {
+    [self initUUID];
     [self startTimer];
 
     [self checkAccessToken];
 }
 
 - (void)stopTimer {
+    NSLog(@"停止Timer");
     if (self._lockTimer != nil) {
         [self._lockTimer stopTimer];
     }
 }
 
 - (void)startTimer {
+    NSLog(@"启动Timer");
     void (^myBlock)(NSTimer *)=^(NSTimer *timer) {
         [self handleTimer:timer];
     };
@@ -289,16 +297,20 @@ NSString *accessToken;
     return [@"yes" isEqualToString:value];
 }
 
-//注册后回调
+//注册成功后回调
 - (void)registeredSuccess:(BOOL)success {
-    //TODO
     if (success) {
         [self writeDataToPlist:@"registered" value:@"yes"];
+        
+        [self startTimer];
     }
 }
 
 //获取token
 - (NSString *)getAccessToken {
+    if (accessToken != nil) {
+        return accessToken;
+    }
     return [self getDataFromPlist:@"token"];
 }
 
@@ -324,6 +336,32 @@ NSString *accessToken;
             //注册提示
             [self.registerButton setTitle:@"请注册"];
         }
+    }
+}
+
+typedef enum REQUEST_TYPE : NSUInteger {
+    SUCCESS,
+    FAIL,
+    NET_ERROR
+} REQUEST_TYPE;
+
+- (void)onRecognitionFaceComplete:(REQUEST_TYPE) type {
+    switch (type) {
+        case SUCCESS:
+            NSLog(@"识别成功，不处理，继续监控，重新启动timer");
+            [self startTimer];
+            break;
+        case FAIL:
+            NSLog(@"识别失败，锁屏，停止监控timer");//(timer如果只运行一次，可以不需要停止)
+            [self stopTimer];
+            [self sleepMac];
+            break;
+        case NET_ERROR:
+            NSLog(@"无网络，不处理，重新启动timer");
+            [self startTimer];
+            break;
+        default:
+            break;
     }
 }
 
@@ -473,9 +511,59 @@ NSString *accessToken;
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:requestHandler];
 }
 
-// 测试github pr
-- (void)testPr {
+- (NSString *)getUUID {
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/usr/sbin/ioreg"];
+    
+    //ioreg -rd1 -c IOPlatformExpertDevice | grep -E '(UUID)'
+    
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: @"-rd1", @"-c",@"IOPlatformExpertDevice",nil];
+    [task setArguments: arguments];
+    
+    NSPipe *pipe;
+    pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+    
+    NSFileHandle *file;
+    file = [pipe fileHandleForReading];
+    
+    [task launch];
+    
+    NSData *data;
+    data = [file readDataToEndOfFile];
+    
+    NSString *string;
+    string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    
+    //NSLog (@"grep returned:n%@", string);
+    
+    NSString *key = @"IOPlatformUUID";
+    NSRange range = [string rangeOfString:key];
+    
+    NSInteger location = range.location + [key length] + 5;
+    NSInteger length = 32 + 4;
+    range.location = location;
+    range.length = length;
+    
+    NSString *UUID = [string substringWithRange:range];
+    
+    
+    UUID = [UUID stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    NSLog(@"UIID:%@",UUID);
+    
+    return UUID;
+}
 
+-(void)initUUID {
+    NSString* uuid = [self getDataFromPlist:@"uuid"];
+    if (uuid==nil) {
+        uuid = [self getUUID];
+        [self writeDataToPlist:@"uuid" value:uuid];
+    }
+    NSLog(@"initUUID:%@", uuid);
+    userId = uuid;
 }
 
 @end
