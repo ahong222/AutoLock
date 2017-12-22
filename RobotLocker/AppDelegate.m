@@ -19,10 +19,12 @@
     NSImage *_image;
 }
 
+//程序启动入口
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
     
     [self setupCaptureSession];
+    [self onAppStart];
 }
 
 
@@ -42,8 +44,6 @@
 
 - (void)setupCaptureSession
 {
-//    [self watchKeyBoard];
-    
     void (^myBlock)(NSTimer*)=^(NSTimer* timer){
         [self handleTimer:timer];
     };
@@ -72,9 +72,9 @@
         // Handling the error appropriately.
     }
     // - (BOOL)canAddInput:(AVCaptureInput *)input;
-
+    
     if ([session canAddInput:input]) {
-
+        
         [session addInput:input];
         NSLog(@"打开摄像头");
     } else {
@@ -104,7 +104,7 @@
     [self.window.contentView.layer addSublayer:preLayer];
     // If you wish to cap the frame rate to a known value, such as 15 fps, set
     // minFrameDuration.
-//    output.minFrameDuration = CMTimeMake(1, 15);
+    //    output.minFrameDuration = CMTimeMake(1, 15);
     
     // Start the session running to start the flow of data
     [session startRunning];
@@ -197,7 +197,7 @@
     
     NSImage *image = [[NSImage alloc] initWithCGImage:quartzImage size:CGSizeMake(320, 240)];
     
-//    UIImage *image = [NSImage imageWithCGImage:quartzImage scale:1.0f orientation:UIImageOrientationRight];
+    //    UIImage *image = [NSImage imageWithCGImage:quartzImage scale:1.0f orientation:UIImageOrientationRight];
     
     // Release the Quartz image
     CGImageRelease(quartzImage);
@@ -210,62 +210,40 @@
     [NSEvent addGlobalMonitorForEventsMatchingMask:NSLeftMouseDownMask|NSMouseMovedMask|NSMouseEnteredMask
      |NSKeyDownMask|NSScrollWheel|NSCursorUpdate|NSOtherMouseDown|NSOtherMouseDragged
      
-      handler:^(NSEvent *event) {
-
-                switch (event.type) {
-                    case NSOtherMouseDragged:
-                        NSLog(@"NSOtherMouseDragged");
-                        break;
-                    case NSOtherMouseDown:
-                        NSLog(@"NSOtherMouseDown");
-                        break;
-                    case NSCursorUpdate:
-                        NSLog(@"NSCursorUpdate");
-                        break;
-                    case NSScrollWheel:
-                        NSLog(@"NSScrollWheel");
-                        break;
-                    case NSKeyDownMask:
-                        NSLog(@"NSKeyDownMask");
-                        break;
-                    case NSLeftMouseDownMask:
-                        NSLog(@"NSLeftMouseDownMask");
-                        break;
-                    case NSMouseMovedMask:
-                        NSLog(@"NSMouseMovedMask");
-                        break;
-                    case NSMouseEnteredMask:
-                        NSLog(@"NSMouseEnteredMask");
-                        break;
-                    case NSEventTypeGesture:
-                        NSLog(@"NSEventTypeGesture");
-                        break;
-                    case NSEventTypeSwipe:
-                        NSLog(@"NSEventTypeSwipe");
-                        break;
-                    case NSEventTypeKeyDown:
-                        NSLog(@"NSEventTypeKeyDown");
-                        break;
-                    case NSEventTypeLeftMouseDown:
-                        NSLog(@"NSEventTypeLeftMouseDown");
-                        break;
-                    case NSEventTypeRightMouseDown:
-                        NSLog(@"NSEventTypeRightMouseDown");
-                        break;
-                    case NSEventTypeMouseMoved:
-                        NSLog(@"NSEventTypeMouseMoved");
-                        break;
-                    case NSEventTypeLeftMouseDragged:
-                        NSLog(@"NSEventTypeLeftMouseDragged");
-                        break;
-                    default:
-                        NSLog(@"其他");
-                        break;
-                }
-          
-        }
+                                           handler:^(NSEvent *event) {
+                                               switch (event.type) {
+                                                   case NSOtherMouseDragged:
+                                                       NSLog(@"NSOtherMouseDragged");
+                                                       break;
+                                                   case NSOtherMouseDown:
+                                                       NSLog(@"NSOtherMouseDown");
+                                                       break;
+                                                   case NSCursorUpdate:
+                                                       NSLog(@"NSCursorUpdate");
+                                                       break;
+                                                   case NSScrollWheel:
+                                                       NSLog(@"NSScrollWheel");
+                                                       break;
+                                                   case NSKeyDownMask:
+                                                       NSLog(@"NSKeyDownMask");
+                                                       break;
+                                                   case NSLeftMouseDownMask:
+                                                       NSLog(@"NSLeftMouseDownMask");
+                                                       break;
+                                                   case NSMouseMovedMask:
+                                                       NSLog(@"NSMouseMovedMask");
+                                                       break;
+                                                   case NSMouseEnteredMask:
+                                                       NSLog(@"NSMouseEnteredMask");
+                                                       break;
+                                                   default:
+                                                       NSLog(@"其他");
+                                                       break;
+                                               }
+                                               
+                                           }
      ];
-
+    
 }
 
 -(void) runSystemCommand:(NSString*) cmd
@@ -275,9 +253,42 @@
      waitUntilExit];
 }
 
+//锁屏
 -(void) sleepMac{
     NSString* cmd = @"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend";
     [self runSystemCommand:cmd];
+}
+
+//app 启动
+-(void) onAppStart{
+    
+}
+
+-(void) stopTimer{
+    
+}
+
+-(void) startTimer{
+    
+}
+
+-(BOOL) hasRegistered {
+    return NO;
+}
+
+//注册后回调
+-(void) registeredSuccess:(BOOL) success {
+    //TODO
+}
+
+//人脸识别，UI线程调用
+-(void) recognitionFace{
+    
+}
+
+//注册，UI线程调用
+-(void) onStartRegister{
+    
 }
 
 @end
