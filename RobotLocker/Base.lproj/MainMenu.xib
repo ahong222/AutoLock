@@ -681,7 +681,7 @@
                     </menu>
                 </menuItem>
             </items>
-            <point key="canvasLocation" x="139" y="128"/>
+            <point key="canvasLocation" x="127" y="-7"/>
         </menu>
         <window title="RobotLocker" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
@@ -692,16 +692,8 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9g0-Cr-888">
-                        <rect key="frame" x="20" y="260" width="80" height="80"/>
-                        <constraints>
-                            <constraint firstAttribute="width" constant="80" id="Cqo-lt-fuO"/>
-                            <constraint firstAttribute="height" constant="80" id="oDq-Z0-Kuo"/>
-                        </constraints>
-                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="I4X-a4-DnV"/>
-                    </imageView>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ugr-0y-aJA">
-                        <rect key="frame" x="269" y="276" width="81" height="32"/>
+                        <rect key="frame" x="376" y="142" width="81" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="注册" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="PeJ-yl-ulg">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -711,12 +703,21 @@
                             <action selector="photo:" target="Voe-Tx-rLC" id="ksQ-81-fz0"/>
                         </connections>
                     </button>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9g0-Cr-888">
+                        <rect key="frame" x="380" y="260" width="80" height="80"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="80" id="Cqo-lt-fuO"/>
+                            <constraint firstAttribute="height" constant="80" id="oDq-Z0-Kuo"/>
+                        </constraints>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="I4X-a4-DnV"/>
+                    </imageView>
                 </subviews>
                 <constraints>
                     <constraint firstItem="9g0-Cr-888" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" constant="20" id="NZb-CN-ju7"/>
                     <constraint firstItem="9g0-Cr-888" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" id="x8b-r8-0vm"/>
                 </constraints>
             </view>
+            <point key="canvasLocation" x="53" y="229"/>
         </window>
     </objects>
 </document>

@@ -15,7 +15,7 @@
 NSString *const client_id = @"kw5KRljuMq4W64HYetziaLnA";
 NSString *const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
 NSString *const grant_type = @"client_credentials";
-NSString *userId;
+NSString* userId;
 int sleeped;
 
 @implementation AppDelegate {
@@ -111,7 +111,7 @@ int sleeped;
 
     AVCaptureVideoPreviewLayer *preLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     //preLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
-    preLayer.frame = CGRectMake(0, 0, 320, 240);
+    preLayer.frame = CGRectMake(0, self.window.contentView.frame.size.height - 240, 320, 240);//self.window.contentView.frame.size.height - 240
     preLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.window.contentView.layer addSublayer:preLayer];
     // If you wish to cap the frame rate to a known value, such as 15 fps, set
@@ -443,6 +443,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=%@&client_secret=%@", client_id, client_secret];
 
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
+        NSLog(@"getAccessToken complete");
         if (connectionError || data == nil) {
             NSLog(@"getAccessToken failed : network error");
             [self getAccessTokenSuccess:NO token:nil];
@@ -545,11 +546,10 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSString *path = [pathArray objectAtIndex:0];
     //获取文件的完整路径
     NSString *filePatch = [path stringByAppendingPathComponent:@"PropertyListTest.plist"];//没有会自动创建
-    NSLog(@"file patch%@", filePatch);
+    NSLog(@"file path%@", filePatch);
     NSMutableDictionary *sandBoxDataDic = [[NSMutableDictionary alloc] initWithContentsOfFile:filePatch];
     if (sandBoxDataDic == nil) {
         sandBoxDataDic = [NSMutableDictionary new];
-        sandBoxDataDic[@"test"] = @"test";
         [sandBoxDataDic writeToFile:filePatch atomically:YES];
         return nil;
     } else {
@@ -594,22 +594,16 @@ typedef enum REQUEST_TYPE : NSUInteger {
 
     if (nil != params) {
         //设置请求体
+        NSLog(@"request path = [%@]", path);
         NSString *param = @"";
-        for (NSString *key in params) {
-            NSUInteger indexOfKey = [[params allKeys] indexOfObject:key];
-            if ([key isEqualToString:@"image"]) {
-                NSLog(@"key=[%@]\tvalue=[%i]", key, [params valueForKey:key] != nil);
-            } else {
-                NSLog(@"key=[%@]\tvalue=[%@]", key, [params valueForKey:key]);
-            }
+        int i = 0;
+        for(NSString * key in params) {
+            i++;
+            NSString* formmat = i==0?@"%@=%@":@"&%@=%@";
 
-            if (indexOfKey < params.count - 1) {
-                param = [param stringByAppendingFormat:@"%@=%@&", key, [params valueForKey:key]];
-            } else {
-                param = [param stringByAppendingFormat:@"%@=%@", key, [params valueForKey:key]];
-            }
+            param = [param stringByAppendingFormat:formmat, key, params[key]];
+            NSLog(@"request param = [%@]", param);
         }
-//        NSLog(@"request param = [%@]", param);
         // NSString --> NSData
         request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
     } else {
