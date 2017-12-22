@@ -149,10 +149,11 @@ int sleeped;
     //图片写文件
     NSString *imageType = @"jpg";
     
-    NSDate *date = [NSDate new];
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    formatter.dateFormat = @"yyyy-MM-dd_HH:ss:mm";
-    NSString *dateStr = [formatter stringFromDate:date];
+//    NSDate *date = [NSDate new];
+//    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+//    formatter.dateFormat = @"yyyy-MM-dd_HH:ss:mm";
+    //不需要动态文件
+    NSString *dateStr = @"img";//[formatter stringFromDate:date];
     
     NSString *imagePath = [NSString stringWithFormat:@"%@/%@.%@",NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES)[0],dateStr,imageType];
     
@@ -526,9 +527,9 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSLog(@"===========start detect image quality===========");
     NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/rest/2.0/face/v2/detect?access_token=%@", [self getAccessToken]];
     NSDictionary *dictionary = @{
-            @"image": image,
-            @"max_face_num": @"1",
-            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
+            @"image": image
+//            @"max_face_num": @"1"
+//            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
     };
 
     NSDictionary *headers = @{
@@ -608,12 +609,16 @@ typedef enum REQUEST_TYPE : NSUInteger {
         int i = 0;
         for(NSString * key in params) {
             i++;
-            NSString* formmat = i==0?@"%@=%@":@"&%@=%@";
+            NSString* formmat = i==1?@"%@=%@":@"&%@=%@";
 
             param = [param stringByAppendingFormat:formmat, key, params[key]];
         }
         // NSString --> NSData
         request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
+        //TODO debug
+        [request.HTTPBody writeToFile:@"/Users/shen/Desktop/data.jpg" atomically:YES];
+        
+        request.HTTPBody =  [NSData dataWithContentsOfFile:@"/Users/shen/Desktop/data.jpg"];
     } else {
         request.HTTPBody = [@"" dataUsingEncoding:NSUTF8StringEncoding];
     }
