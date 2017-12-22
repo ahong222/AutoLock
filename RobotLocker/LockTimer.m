@@ -20,7 +20,7 @@ NSTimeInterval timeInterval = 10.0;
         
         
         // 定时器
-        self._timer = [NSTimer scheduledTimerWithTimeInterval:gap repeats:true block:block];
+        self._timer = [NSTimer scheduledTimerWithTimeInterval:gap repeats:false block:block];
     
     }
     

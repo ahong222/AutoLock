@@ -7,9 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "LockTimer.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
-
+@property LockTimer* _lockTimer;
 @end
 

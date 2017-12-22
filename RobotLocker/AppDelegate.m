@@ -8,12 +8,16 @@
 @property (weak) IBOutlet NSImageView *imageView;
 
 @property (weak) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSButton *registerButton;
+
 @end
 
+NSString * const client_id = @"10573261";
+NSString * const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
+NSString * const API_KEY = @"kw5KRljuMq4W64HYetziaLnA";
+NSString * const grant_type = @"client_credentials";
 
-@implementation AppDelegate
-
-{
+@implementation AppDelegate{
     CMSampleBufferRef _buffer;
     BOOL _takePhoto;
     NSImage *_image;
@@ -39,18 +43,11 @@
     NSDateFormatter *dateFormator = [[NSDateFormatter alloc] init];
     dateFormator.dateFormat = @"yyyy-MM-dd  HH:mm:ss";
     NSString *date = [dateFormator stringFromDate:[NSDate date]];
-    NSLog(@"handleTimer %@", date);
+    NSLog(@"handleTimer %i", date);
 }
 
 - (void)setupCaptureSession
 {
-    void (^myBlock)(NSTimer*)=^(NSTimer* timer){
-        [self handleTimer:timer];
-    };
-    
-    LockTimer* _lockTimer = [[LockTimer alloc] initWithGap:5 block:myBlock];
-    [_lockTimer startTimer];
-    
     NSError *error = nil;
     
     // Create the session
@@ -134,18 +131,29 @@
     imageProps = [NSDictionary dictionaryWithObject:quality forKey:NSImageCompressionFactor];
     NSData *imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
     
-    NSString *imageType = @"jpg";
+    //根据NSData生成Base64编码的String
+    NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
+    NSLog(@"Encode:%@", base64Encode);
     
-    NSDate *date = [NSDate new];
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    formatter.dateFormat = @"yyyy-MM-dd HH:ss:mm";
-    NSString *dateStr = [formatter stringFromDate:date];
+    [self onStartRegister:base64Encode];
     
-    NSString *imagePath = [NSString stringWithFormat:@"%@/%@.%@",NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES)[0],dateStr,imageType];
     
-    BOOL ret = [imageData writeToFile:imagePath atomically:YES];
+    //图片写文件
+//    NSData *nsdata = [@"iOS Developer Tips encode in Base64" dataUsingEncoding:NSUTF8StringEncoding];
+
+//    NSString *imageType = @"jpg";
+//
+//    NSDate *date = [NSDate new];
+//    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+//    formatter.dateFormat = @"yyyy-MM-dd HH:ss:mm";
+//    NSString *dateStr = [formatter stringFromDate:date];
+//
+//    NSString *imagePath = [NSString stringWithFormat:@"%@/%@.%@",NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES)[0],dateStr,imageType];
+//
+//    BOOL ret = [imageData writeToFile:imagePath atomically:YES];
     
-    if (ret) {
+//    if (ret)
+    {
         _buffer = nil;
     }
 }
@@ -154,6 +162,7 @@
 //每当AVCaptureVideoDataOutput实例输出一个新视频帧时就会调用此函数
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
+    //NSLog(@"captureOutput %i" ,_takePhoto);
     if (_takePhoto) {
         _takePhoto = NO;
         _buffer = sampleBuffer;
@@ -259,36 +268,143 @@
     [self runSystemCommand:cmd];
 }
 
+NSString* accessToken;
 //app 启动
 -(void) onAppStart{
+    [self startTimer];
     
+    [self checkAccessToken];
 }
 
 -(void) stopTimer{
-    
+    if (self._lockTimer!=nil){
+        [self._lockTimer stopTimer];
+    }
 }
 
 -(void) startTimer{
+    void (^myBlock)(NSTimer*)=^(NSTimer* timer){
+        [self handleTimer:timer];
+    };
     
+    self._lockTimer = [[LockTimer alloc] initWithGap:5 block:myBlock];
+    [self._lockTimer startTimer];
 }
 
 -(BOOL) hasRegistered {
-    return NO;
+    NSString* value = [self getDataFromPlist:@"registered"];
+    
+    return [@"yes" isEqualToString:value];
 }
 
 //注册后回调
 -(void) registeredSuccess:(BOOL) success {
     //TODO
+    if (success) {
+        [self writeDataToPlist :@"registered" value:@"yes"];
+    }
+}
+
+//获取token
+-(NSString*) getAccessToken {
+    return [self getDataFromPlist:@"token"];
+}
+
+//获取token成功回调
+-(void) getAccessTokenSuccess:(BOOL)success token:(NSString*)token {
+    NSLog(@"getAccessToken Success:%i",success);
+    if (success) {
+        [self writeDataToPlist :@"token" value:token];
+    }
+    
+    [self checkAccessToken];
+}
+
+-(void) checkAccessToken{
+    accessToken = [self getAccessToken];
+    if (accessToken==nil) {
+        [self onStartGetAccessToken];
+        return;
+    } else {
+        if ([self hasRegistered]) {
+            [self startTimer];
+        } else {
+            //注册提示
+            [self.registerButton setTitle:@"请注册"];
+        }
+    }
 }
 
 //人脸识别，UI线程调用
 -(void) recognitionFace{
-    
+    //TODO  震熙
 }
 
-//注册，UI线程调用
--(void) onStartRegister{
-    
+-(void)onStartGetAccessToken {
+    NSLog(@"开始获取AccessToken");
+    NSString* url = @"https://aip.baidubce.com/oauth/2.0/token";
+    NSString* grant_type = @"client_credentials";
+//    client_id,client_secret
+    NSDictionary* dictionary = @{
+                                 @"grant_type":grant_type,
+                                 @"client_id":client_id,
+                                 @"client_secret":client_secret
+                                };
+    //TODO  震熙
+}
+
+//注册人脸，UI线程调用
+-(void) onStartRegister:(NSString*)base64data {
+    NSLog(@"onStartRegister data:%s", base64data);
+    NSString* url = @"";
+    NSString* uid = @"";
+    NSString* user_info = uid;
+    NSString* groupId = uid;
+    NSString* image = base64data;
+    NSString* action_type = @"replace";
+    NSString* access_token = [self getAccessToken];
+    //TODO  震熙
+    NSDictionary* dictionary = @{
+                                 @"uid":uid,
+                                 @"user_info":user_info,
+                                 @"groupId":groupId,
+                                 @"image":base64data,
+                                 @"action_type":action_type,
+                                  @"access_token":access_token
+                                 };
+}
+
+- (NSString*)getDataFromPlist:(NSString*)key {
+    //沙盒获取路径
+    NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *path = [pathArray objectAtIndex:0];
+    //获取文件的完整路径
+    NSString *filePatch = [path stringByAppendingPathComponent:@"PropertyListTest.plist"];//没有会自动创建
+    NSLog(@"file patch%@",filePatch);
+    NSMutableDictionary *sandBoxDataDic = [[NSMutableDictionary alloc]initWithContentsOfFile:filePatch];
+    if (sandBoxDataDic==nil) {
+        return nil;
+//        sandBoxDataDic = [NSMutableDictionary new];
+//        sandBoxDataDic[@"test"] = @"test";
+//        [sandBoxDataDic writeToFile:filePatch atomically:YES];
+    } else {
+        NSLog(@"sandBox %@",sandBoxDataDic);//直接打印数据
+        return sandBoxDataDic[key];
+    }
+}
+
+- (void)writeDataToPlist:(NSString*)key value:(NSString*)value {
+    //这里使用位于沙盒的plist（程序会自动新建的那一个）
+    NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *path = [pathArray objectAtIndex:0];
+    //获取文件的完整路径
+    NSString *filePatch = [path stringByAppendingPathComponent:@"PropertyListTest.plist"];
+    NSMutableDictionary *sandBoxDataDic = [[NSMutableDictionary alloc]initWithContentsOfFile:filePatch];
+    NSLog(@"old sandBox is %@",sandBoxDataDic);
+    sandBoxDataDic[key] = value;
+    [sandBoxDataDic writeToFile:filePatch atomically:YES];
+    sandBoxDataDic = [[NSMutableDictionary alloc]initWithContentsOfFile:filePatch];
+    NSLog(@"new sandBox is %@",sandBoxDataDic);
 }
 
 // 测试github pr

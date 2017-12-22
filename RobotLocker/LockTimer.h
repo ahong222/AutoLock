@@ -14,4 +14,5 @@
 
 -(id)initWithGap:(float)gap block:(void (^)(NSTimer *timer))block;
 -(void)startTimer;
+-(void)stopTimer;
 @end
