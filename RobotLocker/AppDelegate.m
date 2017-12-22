@@ -40,13 +40,12 @@ int sleeped;
 }
 
 
-- (void)applicationDidChangeScreenParameters:(NSNotification *)notification
-{
-    NSLog(@"applicationDidChangeScreenParameters %@, sleeped:%d",notification, sleeped);
-    if (sleeped==2) {
+- (void)applicationDidChangeScreenParameters:(NSNotification *)notification {
+    NSLog(@"applicationDidChangeScreenParameters %@, sleeped:%d", notification, sleeped);
+    if (sleeped == 2) {
         sleeped--;
-    } else if (sleeped==1){
-        sleeped=0;
+    } else if (sleeped == 1) {
+        sleeped = 0;
         NSLog(@"解锁了");
         [self onAppStart];
     }
@@ -59,7 +58,7 @@ int sleeped;
     dateFormator.dateFormat = @"yyyy-MM-dd  HH:mm:ss";
     NSString *date = [dateFormator stringFromDate:[NSDate date]];
     NSLog(@"handleTimer %i", date);
-    
+
     _takePhoto = 2;
 }
 
@@ -152,7 +151,7 @@ int sleeped;
 
     if (takePhotoType == 1) {
         [self onStartRegister:base64Encode];
-    } else if (takePhotoType == 2){
+    } else if (takePhotoType == 2) {
         [self onRecognizeFace:base64Encode];
     }
 
@@ -264,7 +263,7 @@ int sleeped;
 //                                                       NSLog(@"其他");
 //                                                       break;
 //                                               }
-                                               
+
                                                [self stopTimer];
 
                                            }
@@ -322,7 +321,7 @@ NSString *accessToken;
 - (void)registeredSuccess:(BOOL)success {
     if (success) {
         [self writeDataToPlist:@"registered" value:@"yes"];
-        
+
         [self startTimer];
     }
 }
@@ -366,7 +365,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NET_ERROR
 } REQUEST_TYPE;
 
-- (void)onRecognitionFaceComplete:(REQUEST_TYPE) type {
+- (void)onRecognitionFaceComplete:(REQUEST_TYPE)type {
     switch (type) {
         case SUCCESS:
             NSLog(@"识别成功，不处理，继续监控，重新启动timer");
@@ -388,18 +387,16 @@ typedef enum REQUEST_TYPE : NSUInteger {
 
 //人脸识别，UI线程调用
 - (void)onRecognizeFace:(NSString *)base64data {
-    NSLog(@"recognitionFace start.");
-    NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/verify";
+    NSLog(@"===========recognition face start.===========");
+    NSString *url = [NSString stringWithFormat:@"https://aip.baidubce.com/rest/2.0/face/v2/verify?access_token=%@", [self getAccessToken]];
     NSString *uid = [self getUUID];
     NSString *groupId = uid;
     NSString *image = base64data;
-    NSString *access_token = [self getAccessToken];
     NSDictionary *dictionary = @{
             @"uid": uid,
-            @"groupId": groupId,
+            @"group_id": groupId,
             @"image": image,
-            @"top_num": @"1",
-            @"access_token": access_token
+            @"top_num": @"1"
     };
 
     NSDictionary *headers = @{
@@ -418,15 +415,15 @@ typedef enum REQUEST_TYPE : NSUInteger {
                 NSLog(@"recognition face failed : result == nil");
                 [self onRecognitionFaceComplete:FAIL];
             } else {
-                NSNumber * result_num = dict[@"result_num"];
+                NSNumber *result_num = dict[@"result_num"];
                 int resultSize = result_num.intValue;
-                if(resultSize <= 0) {
+                if (resultSize <= 0) {
                     NSLog(@"recognition face failed : result size <= 0");
                     [self onRecognitionFaceComplete:FAIL];
                 } else {
-                    NSNumber* resultAtFirst = result[0];
+                    NSNumber *resultAtFirst = result[0];
                     double finalScore = resultAtFirst.doubleValue;
-                    if(finalScore > 80 && finalScore <= 100) {
+                    if (finalScore > 80 && finalScore <= 100) {
                         NSLog(@"recognition face succeed : finalScore=[%a]", finalScore);
                         [self onRecognitionFaceComplete:SUCCESS];
                     } else {
@@ -441,14 +438,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
 }
 
 - (void)onStartGetAccessToken {
-    NSLog(@"开始获取AccessToken");
-    NSString *grant_type = @"client_credentials";
-    NSDictionary *params = @{
-            @"grant_type": grant_type,
-            @"client_id": client_id,
-            @"client_secret": client_secret
-    };
-
+    NSLog(@"===========开始获取AccessToken===========");
     // 路径
     NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=%@&client_secret=%@", client_id, client_secret];
 
@@ -474,50 +464,25 @@ typedef enum REQUEST_TYPE : NSUInteger {
         }
     };
 
-    NSLog(@"getAccessToken request start : path[%@]", path);
-    NSString* jsonString = [[NSString alloc]initWithContentsOfURL:[NSURL URLWithString:path] encoding:NSUTF8StringEncoding error:nil];
-    if(nil == jsonString) {
-        [self getAccessTokenSuccess:NO token:nil];
-        return;
-    }
-    NSLog(@"注册返回数据:%@", jsonString);
-    //将字符串写到缓冲区。
-    NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-    //解析json数据，使用系统方法 JSONObjectWithData:  options: error:
-    NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableLeaves error:nil];
-    NSString *error = dict[@"error"];
-    NSString *error_description = dict[@"error_description"];
-    if (error) {
-        NSLog(@"getAccessToken failed : error:%@\tdescription:%@\n", error, error_description);
-        [self getAccessTokenSuccess:NO token:nil];
-    } else {
-        NSString *access_token = dict[@"access_token"];
-//        NSLog(@"getAccessToken succeed : access_token = %@\trefresh_token = %@\tsession_key = %@\tsession_key = %@\tsession_secret = %@", access_token, dict[@"refresh_token"], dict[@"session_key"], dict[@"session_secret"]);
-        [self getAccessTokenSuccess:YES token:access_token];
-    }
-
-//    [self postRequest:path params:nil headers:nil requestHandler:requestHandler];
+    [self postRequest:path params:nil headers:nil requestHandler:requestHandler];
 }
 
 //注册，UI线程调用
 - (void)onStartRegister:(NSString *)base64data {
-
-    NSLog(@"onStartRegister data:%@", base64data==nil?@"image is null":@"image ok");
-    NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/faceset/user/add";
+    NSLog(@"===========onStartRegister data:%i===========", base64data != nil);
+    NSString *url = [NSString stringWithFormat:@"https://aip.baidubce.com/rest/2.0/face/v2/faceset/user/add?access_token=%@", [self getAccessToken]];
     NSString *uid = [self getUUID];
     NSString *user_info = uid;
     NSString *groupId = uid;
     NSString *image = base64data;
     NSString *action_type = @"replace";
-    NSString *access_token = [self getAccessToken];
-    NSLog(@"onStartRegister : access_token=[%@]\timage=[%@]", access_token, image);
+    NSLog(@"onStartRegister : image=[%i]", image != nil);
     NSDictionary *dictionary = @{
             @"uid": uid,
             @"user_info": user_info,
-            @"groupId": groupId,
+            @"group_id": groupId,
             @"image": image,
-            @"action_type": action_type,
-            @"access_token": access_token
+            @"action_type": action_type
     };
 
     NSDictionary *headers = @{
@@ -537,6 +502,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
             if (error_code) {
                 NSLog(@"registered failed : error_code:[%@]\terror_msg:[%@]\tlog_id:[%@]\n", error_code, error_msg, log_id);
                 [self registeredSuccess:NO];
+                [self startDetectImageQuality:image];
             } else {
                 NSLog(@"registered succeed : log_id=[%@]", dict[@"log_id"]);
                 [self registeredSuccess:YES];
@@ -545,6 +511,32 @@ typedef enum REQUEST_TYPE : NSUInteger {
     };
 
     [self postRequest:url params:dictionary headers:headers requestHandler:requestHandler];
+}
+
+- (void)startDetectImageQuality:(NSString *)image {
+    NSLog(@"===========start detect image quality===========");
+    NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/rest/2.0/face/v2/detect?access_token=%@", [self getAccessToken]];
+    NSDictionary *dictionary = @{
+            @"image": image,
+            @"max_face_num": @"1",
+            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
+    };
+
+    NSDictionary *headers = @{
+            @"Content-Type": @"application/x-www-form-urlencoded"
+    };
+
+    void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
+        if (connectionError || data == nil) {
+            NSLog(@"registered failed : network error");
+            return;
+        } else {
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+            NSLog(@"dict=%@", dict);
+        }
+    };
+
+    [self postRequest:path params:dictionary headers:headers requestHandler:requestHandler];
 }
 
 
@@ -569,11 +561,13 @@ typedef enum REQUEST_TYPE : NSUInteger {
 - (void)writeDataToPlist:(NSString *)key value:(NSString *)value {
     //这里使用位于沙盒的plist（程序会自动新建的那一个）
     NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *path = [pathArray objectAtIndex:0];
+    NSString *path = pathArray[0];
     //获取文件的完整路径
     NSString *filePatch = [path stringByAppendingPathComponent:@"PropertyListTest.plist"];
+    NSLog(@"path=%@", path);
+    NSLog(@"filePatch=%@", filePatch);
     NSMutableDictionary *sandBoxDataDic = [[NSMutableDictionary alloc] initWithContentsOfFile:filePatch];
-    NSLog(@"old sandBox is %@", sandBoxDataDic);
+    NSLog(@"old sandBox is %@  sandBoxDataDic == nil ? : [%i]\tYES=%i", sandBoxDataDic, (sandBoxDataDic == nil), YES);
     sandBoxDataDic[key] = value;
     [sandBoxDataDic writeToFile:filePatch atomically:YES];
     sandBoxDataDic = [[NSMutableDictionary alloc] initWithContentsOfFile:filePatch];
@@ -598,14 +592,12 @@ typedef enum REQUEST_TYPE : NSUInteger {
     request.timeoutInterval = 30;
     request.HTTPMethod = @"POST";
 
-    if(nil != params) {
+    if (nil != params) {
         //设置请求体
         NSLog(@"request path = [%@]", path);
         NSString *param = @"";
         int i = 0;
         for(NSString * key in params) {
-            NSString* value = params[key];
-            
             i++;
             NSString* formmat = i==0?@"%@=%@":@"&%@=%@";
 
@@ -631,51 +623,51 @@ typedef enum REQUEST_TYPE : NSUInteger {
 - (NSString *)getUUID {
     NSTask *task;
     task = [[NSTask alloc] init];
-    [task setLaunchPath: @"/usr/sbin/ioreg"];
-    
+    [task setLaunchPath:@"/usr/sbin/ioreg"];
+
     //ioreg -rd1 -c IOPlatformExpertDevice | grep -E '(UUID)'
-    
+
     NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: @"-rd1", @"-c",@"IOPlatformExpertDevice",nil];
-    [task setArguments: arguments];
-    
+    arguments = [NSArray arrayWithObjects:@"-rd1", @"-c", @"IOPlatformExpertDevice", nil];
+    [task setArguments:arguments];
+
     NSPipe *pipe;
     pipe = [NSPipe pipe];
-    [task setStandardOutput: pipe];
-    
+    [task setStandardOutput:pipe];
+
     NSFileHandle *file;
     file = [pipe fileHandleForReading];
-    
+
     [task launch];
-    
+
     NSData *data;
     data = [file readDataToEndOfFile];
-    
+
     NSString *string;
-    string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    
+    string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
     //NSLog (@"grep returned:n%@", string);
-    
+
     NSString *key = @"IOPlatformUUID";
     NSRange range = [string rangeOfString:key];
-    
+
     NSInteger location = range.location + [key length] + 5;
     NSInteger length = 32 + 4;
     range.location = location;
     range.length = length;
-    
+
     NSString *UUID = [string substringWithRange:range];
-    
-    
+
+
     UUID = [UUID stringByReplacingOccurrencesOfString:@"-" withString:@""];
-    NSLog(@"UIID:%@",UUID);
-    
+    NSLog(@"UIID:%@", UUID);
+
     return UUID;
 }
 
--(void)initUUID {
-    NSString* uuid = [self getDataFromPlist:@"uuid"];
-    if (uuid==nil) {
+- (void)initUUID {
+    NSString *uuid = [self getDataFromPlist:@"uuid"];
+    if (uuid == nil) {
         uuid = [self getUUID];
         [self writeDataToPlist:@"uuid" value:uuid];
     }
