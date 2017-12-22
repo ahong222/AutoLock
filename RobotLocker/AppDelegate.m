@@ -112,7 +112,7 @@ int sleeped;
 
     AVCaptureVideoPreviewLayer *preLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     //preLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
-    preLayer.frame = CGRectMake(0, 0, 320, 240);
+    preLayer.frame = CGRectMake(0, self.window.contentView.frame.size.height - 240, 320, 240);//self.window.contentView.frame.size.height - 240
     preLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.window.contentView.layer addSublayer:preLayer];
     // If you wish to cap the frame rate to a known value, such as 15 fps, set
@@ -453,6 +453,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=%@&client_secret=%@", client_id, client_secret];
 
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
+        NSLog(@"getAccessToken complete");
         if (connectionError || data == nil) {
             NSLog(@"getAccessToken failed : network error");
             [self getAccessTokenSuccess:NO token:nil];
@@ -479,6 +480,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
         [self getAccessTokenSuccess:NO token:nil];
         return;
     }
+    NSLog(@"注册返回数据:%@", jsonString);
     //将字符串写到缓冲区。
     NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
     //解析json数据，使用系统方法 JSONObjectWithData:  options: error:
@@ -490,7 +492,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
         [self getAccessTokenSuccess:NO token:nil];
     } else {
         NSString *access_token = dict[@"access_token"];
-        NSLog(@"getAccessToken succeed : access_token = %@\trefresh_token = %@\tsession_key = %@\tsession_key = %@\tsession_secret = %@", access_token, dict[@"refresh_token"], dict[@"session_key"], dict[@"session_secret"]);
+//        NSLog(@"getAccessToken succeed : access_token = %@\trefresh_token = %@\tsession_key = %@\tsession_key = %@\tsession_secret = %@", access_token, dict[@"refresh_token"], dict[@"session_key"], dict[@"session_secret"]);
         [self getAccessTokenSuccess:YES token:access_token];
     }
 
@@ -500,7 +502,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
 //注册，UI线程调用
 - (void)onStartRegister:(NSString *)base64data {
 
-    NSLog(@"onStartRegister data:%@", base64data);
+    NSLog(@"onStartRegister data:%@", base64data==nil?@"image is null":@"image ok");
     NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/faceset/user/add";
     NSString *uid = [self getUUID];
     NSString *user_info = uid;
@@ -552,13 +554,12 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSString *path = [pathArray objectAtIndex:0];
     //获取文件的完整路径
     NSString *filePatch = [path stringByAppendingPathComponent:@"PropertyListTest.plist"];//没有会自动创建
-    NSLog(@"file patch%@", filePatch);
+    NSLog(@"file path%@", filePatch);
     NSMutableDictionary *sandBoxDataDic = [[NSMutableDictionary alloc] initWithContentsOfFile:filePatch];
     if (sandBoxDataDic == nil) {
+        sandBoxDataDic = [NSMutableDictionary new];
+        [sandBoxDataDic writeToFile:filePatch atomically:YES];
         return nil;
-//        sandBoxDataDic = [NSMutableDictionary new];
-//        sandBoxDataDic[@"test"] = @"test";
-//        [sandBoxDataDic writeToFile:filePatch atomically:YES];
     } else {
         NSLog(@"sandBox %@", sandBoxDataDic);//直接打印数据
         return sandBoxDataDic[key];
@@ -599,16 +600,18 @@ typedef enum REQUEST_TYPE : NSUInteger {
 
     if(nil != params) {
         //设置请求体
+        NSLog(@"request path = [%@]", path);
         NSString *param = @"";
+        int i = 0;
         for(NSString * key in params) {
-            NSUInteger indexOfKey = [[params allKeys] indexOfObject:key];
-            if(indexOfKey < params.count - 1) {
-                [param stringByAppendingFormat:@"%@=%@&", key, [params valueForKey:key]];
-            } else {
-                [param stringByAppendingFormat:@"%@=%@", key, [params valueForKey:key]];
-            }
+            NSString* value = params[key];
+            
+            i++;
+            NSString* formmat = i==0?@"%@=%@":@"&%@=%@";
+
+            param = [param stringByAppendingFormat:formmat, key, params[key]];
+            NSLog(@"request param = [%@]", param);
         }
-        NSLog(@"request param = [%@]", param);
         // NSString --> NSData
         request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
     } else {
