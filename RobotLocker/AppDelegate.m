@@ -17,6 +17,7 @@ NSString *const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
 NSString *const API_KEY = @"kw5KRljuMq4W64HYetziaLnA";
 NSString *const grant_type = @"client_credentials";
 NSString* userId;
+int sleeped;
 
 @implementation AppDelegate {
     CMSampleBufferRef _buffer;
@@ -30,65 +31,26 @@ NSString* userId;
     // Insert code here to initialize your application
 
     [self setupCaptureSession];
-//    [self onAppStart];
-}
-
-- (void)applicationDidUnhide:(NSNotification *)notification {
-    NSLog(@"applicationDidUnhide");
-}
-
-- (void)applicationDidBecomeActive:(NSNotification *)notification {
-    NSLog(@"applicationDidBecomeActive");
+    [self onAppStart];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
     NSLog(@"applicationWillTerminate");
+    [self stopTimer];
 }
 
 
-- (void)applicationWillFinishLaunching:(NSNotification *)notification {
-    NSLog(@"applicationWillFinishLaunching");
-}
-- (void)applicationWillHide:(NSNotification *)notification
-{
-    NSLog(@"applicationWillHide");
-}
-- (void)applicationDidHide:(NSNotification *)notification
-{
-    NSLog(@"applicationDidHide");
-}
-- (void)applicationWillUnhide:(NSNotification *)notification
-{
-    NSLog(@"applicationWillUnhide");
-}
-- (void)applicationWillBecomeActive:(NSNotification *)notification
-{
-    NSLog(@"applicationWillBecomeActive");
-}
-- (void)applicationWillResignActive:(NSNotification *)notification
-{
-    NSLog(@"applicationWillResignActive");
-}
-- (void)applicationDidResignActive:(NSNotification *)notification
-{
-    NSLog(@"applicationDidResignActive");
-}
-- (void)applicationWillUpdate:(NSNotification *)notification
-{
-    NSLog(@"applicationWillUpdate");
-}
-- (void)applicationDidUpdate:(NSNotification *)notification
-{
-    NSLog(@"applicationDidUpdate ，%@", notification);
-}
 - (void)applicationDidChangeScreenParameters:(NSNotification *)notification
 {
-    NSLog(@"applicationDidChangeScreenParameters %@",notification);
-}
-- (void)applicationDidChangeOcclusionState:(NSNotification *)notification NS_AVAILABLE_MAC(10_9)
-{
-    NSLog(@"applicationDidChangeOcclusionState");
+    NSLog(@"applicationDidChangeScreenParameters %@, sleeped:%d",notification, sleeped);
+    if (sleeped==2) {
+        sleeped--;
+    } else if (sleeped==1){
+        sleeped=0;
+        NSLog(@"解锁了");
+        [self onAppStart];
+    }
 }
 
 
@@ -187,11 +149,11 @@ NSString* userId;
     NSData *imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
     //根据NSData生成Base64编码的String
     NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
-    NSLog(@"Encode:%@", base64Encode);
+//    NSLog(@"Encode:%@", base64Encode);
 
     if (takePhotoType == 1) {
         [self onStartRegister:base64Encode];
-    } else {
+    } else if (takePhotoType == 2){
         [self onRecognizeFace:base64Encode];
     }
 
@@ -319,6 +281,8 @@ NSString* userId;
 
 //锁屏
 - (void)sleepMac {
+    NSLog(@"锁屏");
+    sleeped = 2;
     NSString *cmd = @"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend";
     [self runSystemCommand:cmd];
 }
@@ -328,7 +292,6 @@ NSString *accessToken;
 //app 启动
 - (void)onAppStart {
     [self initUUID];
-    [self startTimer];
 
     [self checkAccessToken];
 }
@@ -374,9 +337,9 @@ NSString *accessToken;
 }
 
 //获取token成功回调
-- (void)getAccessTokenSuccess:(int)success token:(NSString *)token {
-    NSLog(@"getAccessToken Success:%i", success);
-    if (success) {
+- (void)getAccessTokenSuccess:(BOOL)success token:(NSString *)token {
+    NSLog(@"getAccessToken Success:%i, token:%@", success, token);
+    if (success == YES) {
         [self writeDataToPlist:@"token" value:token];
     }
 
@@ -496,6 +459,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
             [self getAccessTokenSuccess:NO token:nil];
             return;
         } else {
+            NSLog(@"getAccessToken success");
             NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
             NSString *error = dict[@"error"];
             NSString *error_description = dict[@"error_description"];
