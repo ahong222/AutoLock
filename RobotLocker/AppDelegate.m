@@ -315,7 +315,7 @@ NSString *accessToken;
 }
 
 //获取token成功回调
-- (void)getAccessTokenSuccess:(BOOL)success token:(NSString *)token {
+- (void)getAccessTokenSuccess:(int)success token:(NSString *)token {
     NSLog(@"getAccessToken Success:%i", success);
     if (success) {
         [self writeDataToPlist:@"token" value:token];
@@ -366,80 +366,139 @@ typedef enum REQUEST_TYPE : NSUInteger {
 }
 
 //人脸识别，UI线程调用
-- (void)recognitionFace {
-    //TODO  震熙
+- (void)recognitionFace:(NSString *)base64data {
+    NSLog(@"recognitionFace start.");
+    NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/verify";
+    NSString *uid = @"zhangzhenxissd";
+    NSString *groupId = uid;
+    NSString *image = base64data;
+    NSString *access_token = [self getAccessToken];
+    NSDictionary *dictionary = @{
+            @"uid": uid,
+            @"groupId": groupId,
+            @"image": image,
+            @"top_num": @"1",
+            @"access_token": access_token
+    };
+
+    NSDictionary *headers = @{
+            @"Content-Type": @"application/x-www-form-urlencoded"
+    };
+
+    void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+        if (connectionError || data == nil) {
+            NSLog(@"recognition face failed : network error");
+            [self onRecognitionFaceComplete:NET_ERROR];
+            return;
+        } else {
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+            NSArray *result = dict[@"result"];
+            if (nil == result) {
+                NSLog(@"recognition face failed : result == nil");
+                [self onRecognitionFaceComplete:FAIL];
+            } else {
+                NSNumber * result_num = dict[@"result_num"];
+                int resultSize = result_num.intValue;
+                if(resultSize <= 0) {
+                    NSLog(@"recognition face failed : result size <= 0");
+                    [self onRecognitionFaceComplete:FAIL];
+                } else {
+                    NSNumber* resultAtFirst = result[0];
+                    double finalScore = resultAtFirst.doubleValue;
+                    if(finalScore > 80 && finalScore <= 100) {
+                        NSLog(@"recognition face succeed : finalScore=[%a]", finalScore);
+                        [self onRecognitionFaceComplete:SUCCESS];
+                    } else {
+                        [self onRecognitionFaceComplete:FAIL];
+                        NSLog(@"recognition face failed : finalScore=[%a]", finalScore);
+                    }
+                }
+            }
+        }
+    };
+    [self postRequest:url params:dictionary headers:headers requestHandler:requestHandler];
 }
 
 - (void)onStartGetAccessToken {
     NSLog(@"开始获取AccessToken");
-    NSString *url = @"https://aip.baidubce.com/oauth/2.0/token";
     NSString *grant_type = @"client_credentials";
-//    client_id,client_secret
-    NSDictionary *dictionary = @{
+    NSDictionary *params = @{
             @"grant_type": grant_type,
             @"client_id": client_id,
             @"client_secret": client_secret
-    };
-    //TODO  震熙
-}
-
-//注册，UI线程调用
-- (void)onStartRegister:(NSString *)base64data {
-
-    NSLog(@"onStartRegister data:%s", base64data);
-    NSString *url = @"";
-    NSString *uid = @"";
-    NSString *user_info = uid;
-    NSString *groupId = uid;
-    NSString *image = base64data;
-    NSString *action_type = @"replace";
-    NSString *access_token = [self getAccessToken];
-    //TODO  震熙
-    NSDictionary *dictionary = @{
-            @"uid": uid,
-            @"user_info": user_info,
-            @"groupId": groupId,
-            @"image": base64data,
-            @"action_type": action_type,
-            @"access_token": access_token
     };
 
     // 路径
     NSString *path = @"https://aip.baidubce.com/oauth/2.0/token";
 
-    // 参数字典
-    NSDictionary *params = @{
-            @"grant_type": @"client_credentials",
-            @"client_id": @"CLIENT_ID",
-            @"client_secret": @"CLIENT_SECRET"
-    };
-
-    NSDictionary *headers = @{
-            @"header1-key": @"header1-value"
-    };
-
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
         if (connectionError || data == nil) {
-            NSLog(@"network error");
+            NSLog(@"getAccessToken failed : network error");
+            [self getAccessTokenSuccess:NO token:nil];
             return;
         } else {
             NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
             NSString *error = dict[@"error"];
             NSString *error_description = dict[@"error_description"];
             if (error) {
-                NSLog(@"error:%@\tdescription:%@\n", error, error_description);
+                NSLog(@"getAccessToken failed : error:%@\tdescription:%@\n", error, error_description);
+                [self getAccessTokenSuccess:NO token:nil];
             } else {
                 NSString *access_token = dict[@"access_token"];
-                NSLog(@"access_token = %@", access_token);
-                NSLog(@"refresh_token = %@", dict[@"refresh_token"]);
-                NSLog(@"session_key = %@", dict[@"session_key"]);
-                NSLog(@"session_secret = %@", dict[@"session_secret"]);
+                NSLog(@"getAccessToken succeed : access_token = %@\trefresh_token = %@\tsession_key = %@\tsession_key = %@\tsession_secret = %@", access_token, dict[@"refresh_token"], dict[@"session_key"], dict[@"session_secret"]);
+                [self getAccessTokenSuccess:YES token:access_token];
             }
         }
     };
 
-    [self postRequest:path params:params headers:headers requestHandler:requestHandler];
+    [self postRequest:path params:params headers:nil requestHandler:requestHandler];
+}
 
+//注册，UI线程调用
+- (void)onStartRegister:(NSString *)base64data {
+
+    NSLog(@"onStartRegister data:%@", base64data);
+    NSString *url = @"https://aip.baidubce.com/rest/2.0/face/v2/faceset/user/add";
+    NSString *uid = @"zhangzhenxissd";
+    NSString *user_info = uid;
+    NSString *groupId = uid;
+    NSString *image = base64data;
+    NSString *action_type = @"replace";
+    NSString *access_token = [self getAccessToken];
+    NSDictionary *dictionary = @{
+            @"uid": uid,
+            @"user_info": user_info,
+            @"groupId": groupId,
+            @"image": image,
+            @"action_type": action_type,
+            @"access_token": access_token
+    };
+
+    NSDictionary *headers = @{
+            @"Content-Type": @"application/x-www-form-urlencoded"
+    };
+
+    void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
+        if (connectionError || data == nil) {
+            NSLog(@"registered failed : network error");
+            [self registeredSuccess:NO];
+            return;
+        } else {
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+            NSString *log_id = dict[@"log_id"];
+            NSString *error_code = dict[@"error_code"];
+            NSString *error_msg = dict[@"error_msg"];
+            if (error_code) {
+                NSLog(@"registered failed : error_code:[%@]\terror_msg:[%@]\tlog_id:[%@]\n", error_code, error_msg, log_id);
+                [self registeredSuccess:NO];
+            } else {
+                NSLog(@"registered succeed : log_id=[%@]", dict[@"log_id"]);
+                [self registeredSuccess:YES];
+            }
+        }
+    };
+
+    [self postRequest:url params:dictionary headers:headers requestHandler:requestHandler];
 }
 
 
