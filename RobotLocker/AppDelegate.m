@@ -553,19 +553,26 @@ typedef enum REQUEST_TYPE : NSUInteger {
     request.timeoutInterval = 30;
     request.HTTPMethod = @"POST";
 
+    //设置请求体
+    NSString *param = [NSString alloc];
+    for(NSString * key in params) {
+        NSUInteger indexOfKey = [[params allKeys] indexOfObject:key];
+        if(indexOfKey < params.count - 1) {
+            [param stringByAppendingFormat:@"%@=%@&", key, [params valueForKey:key]];
+        } else {
+            [param stringByAppendingFormat:@"%@=%@", key, [params valueForKey:key]];
+        }
+    }
+    NSLog(@"request param = [%@]", param);
+    // NSString --> NSData
+    request.HTTPBody =  [param dataUsingEncoding:NSUTF8StringEncoding];
+
     // 设置请求头
     if (headers != nil) {
         for (NSString *key in headers) {
-            [request setValue:key forHTTPHeaderField:[headers valueForKey:key]];
+            [request setValue:[headers valueForKey:key] forHTTPHeaderField:key];
         }
     }
-
-    // 构建请求体
-    NSData *json = [NSJSONSerialization dataWithJSONObject:params options:NSJSONWritingPrettyPrinted error:nil];
-    request.HTTPBody = json;
-
-    // 5.设置请求头：这次请求体的数据不再是普通的参数，而是一个JSON数据
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:requestHandler];
 }
