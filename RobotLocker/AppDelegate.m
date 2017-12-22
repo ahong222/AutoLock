@@ -145,9 +145,30 @@ int sleeped;
     NSNumber *quality = [NSNumber numberWithFloat:1];
     imageProps = [NSDictionary dictionaryWithObject:quality forKey:NSImageCompressionFactor];
     NSData *imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
+    
+    //图片写文件
+    NSString *imageType = @"jpg";
+    
+//    NSDate *date = [NSDate new];
+//    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+//    formatter.dateFormat = @"yyyy-MM-dd_HH:ss:mm";
+    //不需要动态文件
+    NSString *dateStr = @"img";//[formatter stringFromDate:date];
+    
+    NSString *imagePath = [NSString stringWithFormat:@"%@/%@.%@",NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES)[0],dateStr,imageType];
+    
+    BOOL ret = [imageData writeToFile:imagePath atomically:YES];
+    NSLog(@"imagePath:%@", imagePath);
+    
+    //openssl base64 -in /Users/shen/Desktop/img.jpg -out /Users/shen/Desktop/img_2.jpg
+    NSString* newPath = [NSString stringWithFormat:@"%@_base64", imagePath];
+    NSString* command = [NSString stringWithFormat:@"openssl base64 -in %@ -out %@", imagePath, newPath];
+    [self runSystemCommand:command];
+    NSLog(@"command:%@", command);
+    
     //根据NSData生成Base64编码的String
-    NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
-//    NSLog(@"Encode:%@", base64Encode);
+    NSString *base64Encode = [NSString stringWithContentsOfFile:newPath encoding:NSUTF8StringEncoding error:nil];
+    NSLog(@"base64Encode:%@", base64Encode);
 
     if (takePhotoType == 1) {
         [self onStartRegister:base64Encode];
@@ -155,20 +176,7 @@ int sleeped;
         [self onRecognizeFace:base64Encode];
     }
 
-
-    //图片写文件
-//    NSData *nsdata = [@"iOS Developer Tips encode in Base64" dataUsingEncoding:NSUTF8StringEncoding];
-//    NSString *imageType = @"jpg";
-    //
-//    NSDate *date = [NSDate new];
-//    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-//    formatter.dateFormat = @"yyyy-MM-dd HH:ss:mm";
-//    NSString *dateStr = [formatter stringFromDate:date];
-    //
-//    NSString *imagePath = [NSString stringWithFormat:@"%@/%@.%@",NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES)[0],dateStr,imageType];
-    //
-//    BOOL ret = [imageData writeToFile:imagePath atomically:YES];
-
+    
 //    if (ret) {
     _buffer = nil;
 }
@@ -347,6 +355,7 @@ NSString *accessToken;
 - (void)checkAccessToken {
     accessToken = [self getAccessToken];
     if (accessToken == nil) {
+        NSLog(@"==初次使用，没有AccessToken");
         [self onStartGetAccessToken];
         return;
     } else {
@@ -354,6 +363,7 @@ NSString *accessToken;
             [self startTimer];
         } else {
             //注册提示
+            NSLog(@"==初次使用，请注册");
             [self.registerButton setTitle:@"请注册"];
         }
     }
@@ -517,9 +527,9 @@ typedef enum REQUEST_TYPE : NSUInteger {
     NSLog(@"===========start detect image quality===========");
     NSString *path = [NSString stringWithFormat:@"https://aip.baidubce.com/rest/2.0/face/v2/detect?access_token=%@", [self getAccessToken]];
     NSDictionary *dictionary = @{
-            @"image": image,
-            @"max_face_num": @"1",
-            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
+            @"image": image
+//            @"max_face_num": @"1"
+//            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
     };
 
     NSDictionary *headers = @{
@@ -599,13 +609,16 @@ typedef enum REQUEST_TYPE : NSUInteger {
         int i = 0;
         for(NSString * key in params) {
             i++;
-            NSString* formmat = i==0?@"%@=%@":@"&%@=%@";
+            NSString* formmat = i==1?@"%@=%@":@"&%@=%@";
 
             param = [param stringByAppendingFormat:formmat, key, params[key]];
-            NSLog(@"request param = [%@]", param);
         }
         // NSString --> NSData
         request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
+        //TODO debug
+        [request.HTTPBody writeToFile:@"/Users/shen/Desktop/data.jpg" atomically:YES];
+        
+        request.HTTPBody =  [NSData dataWithContentsOfFile:@"/Users/shen/Desktop/data.jpg"];
     } else {
         request.HTTPBody = [@"" dataUsingEncoding:NSUTF8StringEncoding];
     }
