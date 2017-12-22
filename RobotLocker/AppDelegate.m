@@ -1,12 +1,7 @@
-//
-//  AppDelegate.m
-//  AVTest
-//
-//  Created by mxc235 on 2016/12/12.
-//  Copyright © 2016年 EncircleCloud. All rights reserved.
-//
 
 #import "AppDelegate.h"
+#import "LockTimer.h"
+
 #import <AVFoundation/AVFoundation.h>
 
 @interface AppDelegate ()<AVCaptureVideoDataOutputSampleBufferDelegate>
@@ -35,9 +30,26 @@
     // Insert code here to tear down your application
 }
 
+
+// 触发事件
+- (void)handleTimer:(NSTimer *)theTimer
+{
+    NSDateFormatter *dateFormator = [[NSDateFormatter alloc] init];
+    dateFormator.dateFormat = @"yyyy-MM-dd  HH:mm:ss";
+    NSString *date = [dateFormator stringFromDate:[NSDate date]];
+    NSLog(@"handleTimer %@", date);
+}
+
 - (void)setupCaptureSession
 {
-    [self watchKeyBoard];
+//    [self watchKeyBoard];
+    
+    void (^myBlock)(NSTimer*)=^(NSTimer* timer){
+        [self handleTimer:timer];
+    };
+    
+    LockTimer* _lockTimer = [[LockTimer alloc] initWithGap:5 block:myBlock];
+    [_lockTimer startTimer];
     
     NSError *error = nil;
     
@@ -254,6 +266,18 @@
         }
      ];
 
+}
+
+-(void) runSystemCommand:(NSString*) cmd
+{
+    [[NSTask launchedTaskWithLaunchPath:@"/bin/sh"
+                              arguments:@[@"-c", cmd]]
+     waitUntilExit];
+}
+
+-(void) sleepMac{
+    NSString* cmd = @"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend";
+    [self runSystemCommand:cmd];
 }
 
 @end

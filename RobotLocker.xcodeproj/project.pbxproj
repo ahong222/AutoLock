@@ -14,6 +14,7 @@
 		0DF8FE971DFE519F00FD499F /* AVTestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF8FE961DFE519F00FD499F /* AVTestTests.m */; };
 		0DF8FEA21DFE519F00FD499F /* AVTestUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF8FEA11DFE519F00FD499F /* AVTestUITests.m */; };
 		0DF8FEB11DFE51FC00FD499F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DF8FEB01DFE51FC00FD499F /* AVFoundation.framework */; };
+		64DA79EB1FECAE2E0010EA62 /* LockTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 64DA79EA1FECAE2E0010EA62 /* LockTimer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,20 +35,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0DF8FE7F1DFE519F00FD499F /* AVTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF8FE7F1DFE519F00FD499F /* RobotLocker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RobotLocker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DF8FE821DFE519F00FD499F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0DF8FE831DFE519F00FD499F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0DF8FE861DFE519F00FD499F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0DF8FE881DFE519F00FD499F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0DF8FE8B1DFE519F00FD499F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		0DF8FE8D1DFE519F00FD499F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0DF8FE921DFE519F00FD499F /* AVTestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AVTestTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF8FE921DFE519F00FD499F /* RobotLockerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RobotLockerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DF8FE961DFE519F00FD499F /* AVTestTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVTestTests.m; sourceTree = "<group>"; };
 		0DF8FE981DFE519F00FD499F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0DF8FE9D1DFE519F00FD499F /* AVTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AVTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF8FE9D1DFE519F00FD499F /* RobotLockerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RobotLockerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DF8FEA11DFE519F00FD499F /* AVTestUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVTestUITests.m; sourceTree = "<group>"; };
 		0DF8FEA31DFE519F00FD499F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0DF8FEB01DFE51FC00FD499F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		64DA79E91FECAE2E0010EA62 /* LockTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LockTimer.h; sourceTree = "<group>"; };
+		64DA79EA1FECAE2E0010EA62 /* LockTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LockTimer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,9 +82,9 @@
 		0DF8FE761DFE519F00FD499F = {
 			isa = PBXGroup;
 			children = (
-				0DF8FE811DFE519F00FD499F /* AVTest */,
-				0DF8FE951DFE519F00FD499F /* AVTestTests */,
-				0DF8FEA01DFE519F00FD499F /* AVTestUITests */,
+				0DF8FE811DFE519F00FD499F /* RobotLocker */,
+				0DF8FE951DFE519F00FD499F /* RobotLockerTests */,
+				0DF8FEA01DFE519F00FD499F /* RobotLockerUITests */,
 				0DF8FE801DFE519F00FD499F /* Products */,
 				0DF8FEAF1DFE51FC00FD499F /* Frameworks */,
 			);
@@ -90,14 +93,14 @@
 		0DF8FE801DFE519F00FD499F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0DF8FE7F1DFE519F00FD499F /* AVTest.app */,
-				0DF8FE921DFE519F00FD499F /* AVTestTests.xctest */,
-				0DF8FE9D1DFE519F00FD499F /* AVTestUITests.xctest */,
+				0DF8FE7F1DFE519F00FD499F /* RobotLocker.app */,
+				0DF8FE921DFE519F00FD499F /* RobotLockerTests.xctest */,
+				0DF8FE9D1DFE519F00FD499F /* RobotLockerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		0DF8FE811DFE519F00FD499F /* AVTest */ = {
+		0DF8FE811DFE519F00FD499F /* RobotLocker */ = {
 			isa = PBXGroup;
 			children = (
 				0DF8FE821DFE519F00FD499F /* AppDelegate.h */,
@@ -106,8 +109,10 @@
 				0DF8FE8A1DFE519F00FD499F /* MainMenu.xib */,
 				0DF8FE8D1DFE519F00FD499F /* Info.plist */,
 				0DF8FE851DFE519F00FD499F /* Supporting Files */,
+				64DA79E91FECAE2E0010EA62 /* LockTimer.h */,
+				64DA79EA1FECAE2E0010EA62 /* LockTimer.m */,
 			);
-			path = AVTest;
+			path = RobotLocker;
 			sourceTree = "<group>";
 		};
 		0DF8FE851DFE519F00FD499F /* Supporting Files */ = {
@@ -118,22 +123,22 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		0DF8FE951DFE519F00FD499F /* AVTestTests */ = {
+		0DF8FE951DFE519F00FD499F /* RobotLockerTests */ = {
 			isa = PBXGroup;
 			children = (
 				0DF8FE961DFE519F00FD499F /* AVTestTests.m */,
 				0DF8FE981DFE519F00FD499F /* Info.plist */,
 			);
-			path = AVTestTests;
+			path = RobotLockerTests;
 			sourceTree = "<group>";
 		};
-		0DF8FEA01DFE519F00FD499F /* AVTestUITests */ = {
+		0DF8FEA01DFE519F00FD499F /* RobotLockerUITests */ = {
 			isa = PBXGroup;
 			children = (
 				0DF8FEA11DFE519F00FD499F /* AVTestUITests.m */,
 				0DF8FEA31DFE519F00FD499F /* Info.plist */,
 			);
-			path = AVTestUITests;
+			path = RobotLockerUITests;
 			sourceTree = "<group>";
 		};
 		0DF8FEAF1DFE51FC00FD499F /* Frameworks */ = {
@@ -147,9 +152,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0DF8FE7E1DFE519F00FD499F /* AVTest */ = {
+		0DF8FE7E1DFE519F00FD499F /* RobotLocker */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0DF8FEA61DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTest" */;
+			buildConfigurationList = 0DF8FEA61DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLocker" */;
 			buildPhases = (
 				0DF8FE7B1DFE519F00FD499F /* Sources */,
 				0DF8FE7C1DFE519F00FD499F /* Frameworks */,
@@ -159,14 +164,14 @@
 			);
 			dependencies = (
 			);
-			name = AVTest;
+			name = RobotLocker;
 			productName = AVTest;
-			productReference = 0DF8FE7F1DFE519F00FD499F /* AVTest.app */;
+			productReference = 0DF8FE7F1DFE519F00FD499F /* RobotLocker.app */;
 			productType = "com.apple.product-type.application";
 		};
-		0DF8FE911DFE519F00FD499F /* AVTestTests */ = {
+		0DF8FE911DFE519F00FD499F /* RobotLockerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0DF8FEA91DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTestTests" */;
+			buildConfigurationList = 0DF8FEA91DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLockerTests" */;
 			buildPhases = (
 				0DF8FE8E1DFE519F00FD499F /* Sources */,
 				0DF8FE8F1DFE519F00FD499F /* Frameworks */,
@@ -177,14 +182,14 @@
 			dependencies = (
 				0DF8FE941DFE519F00FD499F /* PBXTargetDependency */,
 			);
-			name = AVTestTests;
+			name = RobotLockerTests;
 			productName = AVTestTests;
-			productReference = 0DF8FE921DFE519F00FD499F /* AVTestTests.xctest */;
+			productReference = 0DF8FE921DFE519F00FD499F /* RobotLockerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		0DF8FE9C1DFE519F00FD499F /* AVTestUITests */ = {
+		0DF8FE9C1DFE519F00FD499F /* RobotLockerUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0DF8FEAC1DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTestUITests" */;
+			buildConfigurationList = 0DF8FEAC1DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLockerUITests" */;
 			buildPhases = (
 				0DF8FE991DFE519F00FD499F /* Sources */,
 				0DF8FE9A1DFE519F00FD499F /* Frameworks */,
@@ -195,9 +200,9 @@
 			dependencies = (
 				0DF8FE9F1DFE519F00FD499F /* PBXTargetDependency */,
 			);
-			name = AVTestUITests;
+			name = RobotLockerUITests;
 			productName = AVTestUITests;
-			productReference = 0DF8FE9D1DFE519F00FD499F /* AVTestUITests.xctest */;
+			productReference = 0DF8FE9D1DFE519F00FD499F /* RobotLockerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -225,7 +230,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0DF8FE7A1DFE519F00FD499F /* Build configuration list for PBXProject "AVTest" */;
+			buildConfigurationList = 0DF8FE7A1DFE519F00FD499F /* Build configuration list for PBXProject "RobotLocker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -238,9 +243,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0DF8FE7E1DFE519F00FD499F /* AVTest */,
-				0DF8FE911DFE519F00FD499F /* AVTestTests */,
-				0DF8FE9C1DFE519F00FD499F /* AVTestUITests */,
+				0DF8FE7E1DFE519F00FD499F /* RobotLocker */,
+				0DF8FE911DFE519F00FD499F /* RobotLockerTests */,
+				0DF8FE9C1DFE519F00FD499F /* RobotLockerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -276,6 +281,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64DA79EB1FECAE2E0010EA62 /* LockTimer.m in Sources */,
 				0DF8FE871DFE519F00FD499F /* main.m in Sources */,
 				0DF8FE841DFE519F00FD499F /* AppDelegate.m in Sources */,
 			);
@@ -302,12 +308,12 @@
 /* Begin PBXTargetDependency section */
 		0DF8FE941DFE519F00FD499F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0DF8FE7E1DFE519F00FD499F /* AVTest */;
+			target = 0DF8FE7E1DFE519F00FD499F /* RobotLocker */;
 			targetProxy = 0DF8FE931DFE519F00FD499F /* PBXContainerItemProxy */;
 		};
 		0DF8FE9F1DFE519F00FD499F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0DF8FE7E1DFE519F00FD499F /* AVTest */;
+			target = 0DF8FE7E1DFE519F00FD499F /* RobotLocker */;
 			targetProxy = 0DF8FE9E1DFE519F00FD499F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -364,6 +370,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -405,6 +412,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -416,7 +424,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTest/Info.plist;
+				INFOPLIST_FILE = RobotLocker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -428,7 +436,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTest/Info.plist;
+				INFOPLIST_FILE = RobotLocker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -440,11 +448,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTestTests/Info.plist;
+				INFOPLIST_FILE = RobotLockerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTestTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AVTest.app/Contents/MacOS/AVTest";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RobotLocker.app/Contents/MacOS/RobotLocker";
 			};
 			name = Debug;
 		};
@@ -453,11 +461,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTestTests/Info.plist;
+				INFOPLIST_FILE = RobotLockerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTestTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AVTest.app/Contents/MacOS/AVTest";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RobotLocker.app/Contents/MacOS/RobotLocker";
 			};
 			name = Release;
 		};
@@ -465,7 +473,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTestUITests/Info.plist;
+				INFOPLIST_FILE = RobotLockerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTestUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -477,7 +485,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AVTestUITests/Info.plist;
+				INFOPLIST_FILE = RobotLockerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whiteInte.AVTestUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -488,7 +496,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0DF8FE7A1DFE519F00FD499F /* Build configuration list for PBXProject "AVTest" */ = {
+		0DF8FE7A1DFE519F00FD499F /* Build configuration list for PBXProject "RobotLocker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0DF8FEA41DFE519F00FD499F /* Debug */,
@@ -497,29 +505,32 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0DF8FEA61DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTest" */ = {
+		0DF8FEA61DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLocker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0DF8FEA71DFE519F00FD499F /* Debug */,
 				0DF8FEA81DFE519F00FD499F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
-		0DF8FEA91DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTestTests" */ = {
+		0DF8FEA91DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLockerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0DF8FEAA1DFE519F00FD499F /* Debug */,
 				0DF8FEAB1DFE519F00FD499F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
-		0DF8FEAC1DFE519F00FD499F /* Build configuration list for PBXNativeTarget "AVTestUITests" */ = {
+		0DF8FEAC1DFE519F00FD499F /* Build configuration list for PBXNativeTarget "RobotLockerUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0DF8FEAD1DFE519F00FD499F /* Debug */,
 				0DF8FEAE1DFE519F00FD499F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
