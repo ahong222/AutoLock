@@ -17,6 +17,7 @@ NSString *const client_secret = @"ZTESzOtELk37WDCAyGXWY5LM7niXwbIW";
 NSString *const grant_type = @"client_credentials";
 NSString* userId;
 int sleeped;
+NSDictionary* headers;
 
 @implementation AppDelegate {
     CMSampleBufferRef _buffer;
@@ -28,7 +29,11 @@ int sleeped;
 //程序启动入口
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-
+    headers = @{
+                @"Content-Type": @"application/x-www-form-urlencoded",
+                @"charset": @"UTF-8",
+                @"enctype": @"application/x-www-form-urlencoded"
+                };
     [self setupCaptureSession];
     [self onAppStart];
 }
@@ -42,13 +47,13 @@ int sleeped;
 
 - (void)applicationDidChangeScreenParameters:(NSNotification *)notification {
     NSLog(@"applicationDidChangeScreenParameters %@, sleeped:%d", notification, sleeped);
-    if (sleeped == 2) {
-        sleeped--;
-    } else if (sleeped == 1) {
-        sleeped = 0;
-        NSLog(@"解锁了");
-        [self onAppStart];
-    }
+//    if (sleeped == 2) {
+//        sleeped--;
+//    } else if (sleeped == 1) {
+//        sleeped = 0;
+//        NSLog(@"解锁了");
+//        [self onAppStart];
+//    }
 }
 
 
@@ -159,16 +164,11 @@ int sleeped;
     
     BOOL ret = [imageData writeToFile:imagePath atomically:YES];
     NSLog(@"imagePath:%@", imagePath);
-    
-    //openssl base64 -in /Users/shen/Desktop/img.jpg -out /Users/shen/Desktop/img_2.jpg
-    NSString* newPath = [NSString stringWithFormat:@"%@_base64", imagePath];
-    NSString* command = [NSString stringWithFormat:@"openssl base64 -in %@ -out %@", imagePath, newPath];
-    [self runSystemCommand:command];
-    NSLog(@"command:%@", command);
+
     
     //根据NSData生成Base64编码的String
-    NSString *base64Encode = [NSString stringWithContentsOfFile:newPath encoding:NSUTF8StringEncoding error:nil];
-    NSLog(@"base64Encode:%@", base64Encode);
+     NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
+//    NSLog(@"base64Encode:%@", base64Encode);
 
     if (takePhotoType == 1) {
         [self onStartRegister:base64Encode];
@@ -273,6 +273,7 @@ int sleeped;
 //                                               }
 
                                                [self stopTimer];
+                                               [self startTimer];
 
                                            }
     ];
@@ -289,7 +290,7 @@ int sleeped;
 - (void)sleepMac {
     NSLog(@"锁屏");
     sleeped = 2;
-    NSString *cmd = @"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend";
+    NSString *cmd = @"/System/Library/CoreServices/Menu\\ Extras/User.menu/Contents/Resources/CGSession -suspend";
     [self runSystemCommand:cmd];
 }
 
@@ -315,7 +316,7 @@ NSString *accessToken;
         [self handleTimer:timer];
     };
 
-    self._lockTimer = [[LockTimer alloc] initWithGap:5 block:myBlock];
+    self._lockTimer = [[LockTimer alloc] initWithGap:20 block:myBlock];
     [self._lockTimer startTimer];
 }
 
@@ -326,7 +327,8 @@ NSString *accessToken;
 }
 
 //注册成功后回调
-- (void)registeredSuccess:(BOOL)success {
+- (void)onRegisteredSuccess:(BOOL)success {
+    success = YES;//TODO
     if (success) {
         [self writeDataToPlist:@"registered" value:@"yes"];
 
@@ -360,6 +362,7 @@ NSString *accessToken;
         return;
     } else {
         if ([self hasRegistered]) {
+            [self watchKeyBoard];
             [self startTimer];
         } else {
             //注册提示
@@ -376,6 +379,7 @@ typedef enum REQUEST_TYPE : NSUInteger {
 } REQUEST_TYPE;
 
 - (void)onRecognitionFaceComplete:(REQUEST_TYPE)type {
+    type = FAIL;//TODO
     switch (type) {
         case SUCCESS:
             NSLog(@"识别成功，不处理，继续监控，重新启动timer");
@@ -407,10 +411,6 @@ typedef enum REQUEST_TYPE : NSUInteger {
             @"group_id": groupId,
             @"image": image,
             @"top_num": @"1"
-    };
-
-    NSDictionary *headers = @{
-            @"Content-Type": @"application/x-www-form-urlencoded"
     };
 
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *response, NSData *data, NSError *connectionError) {
@@ -494,15 +494,11 @@ typedef enum REQUEST_TYPE : NSUInteger {
             @"image": image,
             @"action_type": action_type
     };
-
-    NSDictionary *headers = @{
-            @"Content-Type": @"application/x-www-form-urlencoded"
-    };
-
+    
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
         if (connectionError || data == nil) {
             NSLog(@"registered failed : network error");
-            [self registeredSuccess:NO];
+            [self onRegisteredSuccess:NO];
             return;
         } else {
             NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
@@ -511,11 +507,11 @@ typedef enum REQUEST_TYPE : NSUInteger {
             NSString *error_msg = dict[@"error_msg"];
             if (error_code) {
                 NSLog(@"registered failed : error_code:[%@]\terror_msg:[%@]\tlog_id:[%@]\n", error_code, error_msg, log_id);
-                [self registeredSuccess:NO];
+                [self onRegisteredSuccess:NO];
                 [self startDetectImageQuality:image];
             } else {
                 NSLog(@"registered succeed : log_id=[%@]", dict[@"log_id"]);
-                [self registeredSuccess:YES];
+                [self onRegisteredSuccess:YES];
             }
         }
     };
@@ -530,10 +526,6 @@ typedef enum REQUEST_TYPE : NSUInteger {
             @"image": image
 //            @"max_face_num": @"1"
 //            @"face_fields": @"age,beauty,expression,faceshape,gender,glasses,landmark,race,qualities"
-    };
-
-    NSDictionary *headers = @{
-            @"Content-Type": @"application/x-www-form-urlencoded"
     };
 
     void (^requestHandler)(NSURLResponse *, NSData *, NSError *)=^(NSURLResponse *_Nullable response, NSData *_Nullable data, NSError *_Nullable connectionError) {
@@ -615,10 +607,11 @@ typedef enum REQUEST_TYPE : NSUInteger {
         }
         // NSString --> NSData
         request.HTTPBody = [param dataUsingEncoding:NSUTF8StringEncoding];
-        //TODO debug
-        [request.HTTPBody writeToFile:@"/Users/shen/Desktop/data.jpg" atomically:YES];
         
-        request.HTTPBody =  [NSData dataWithContentsOfFile:@"/Users/shen/Desktop/data.jpg"];
+        //TODO debug
+        NSLog(@"request url:%@", url);
+        [request.HTTPBody writeToFile:@"/Users/shen/Desktop/data.jpg" atomically:YES];
+//        request.HTTPBody = [NSData dataWithContentsOfFile:@"/Users/shen/Desktop/data.jpg"];
     } else {
         request.HTTPBody = [@"" dataUsingEncoding:NSUTF8StringEncoding];
     }
