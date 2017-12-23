@@ -164,16 +164,23 @@ NSDictionary* headers;
     
     BOOL ret = [imageData writeToFile:imagePath atomically:YES];
     NSLog(@"imagePath:%@", imagePath);
-
     
+    //NSImage *imageFromDesk = [NSImage imageNamed:@"img0.jpg"];
+    //NSData *imageDataFromDesk = [imageFromDesk representationUsingType:];
+
+    NSData *fileData = [NSData dataWithContentsOfFile:@"/Users/zhenxi/Desktop/img0.jpg"];
     //根据NSData生成Base64编码的String
-     NSString *base64Encode = [imageData base64EncodedStringWithOptions:0];
+     NSString *base64Encode = [fileData base64EncodedStringWithOptions:0];
+//    NSString *base64Encode1 = [base64Encode stringByReplacingOccurrencesOfString:@" " withString:@"+"];
+            NSString *encodedParam = [base64Encode stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet characterSetWithCharactersInString:@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~"]];
+    NSLog(@"1111=%@", encodedParam);
+//    NSLog(@"2222=%@", base64Encode1);
 //    NSLog(@"base64Encode:%@", base64Encode);
 
     if (takePhotoType == 1) {
-        [self onStartRegister:base64Encode];
+        [self onStartRegister:encodedParam];
     } else if (takePhotoType == 2) {
-        [self onRecognizeFace:base64Encode];
+        [self onRecognizeFace:encodedParam];
     }
 
     
@@ -291,7 +298,7 @@ NSDictionary* headers;
     NSLog(@"锁屏");
     sleeped = 2;
     NSString *cmd = @"/System/Library/CoreServices/Menu\\ Extras/User.menu/Contents/Resources/CGSession -suspend";
-    [self runSystemCommand:cmd];
+    //[self runSystemCommand:cmd];
 }
 
 NSString *accessToken;
